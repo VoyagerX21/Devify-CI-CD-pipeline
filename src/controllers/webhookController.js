@@ -49,4 +49,25 @@ const handleGitHubWebhook = async (req, res) => {
     }
 };
 
-module.exports = { handleGitHubWebhook };
+const getPipelineStatus = async (req, res) => {
+    try{
+        const events = await Event.find().sort({ received: -1 });
+        return res.status(200).json({
+            count: events.length,
+            events: events.map(e => ({
+                type: e.eventType,
+                repository: e.repository,
+                pusher: e.pusher,
+                message: e.message,
+                status: e.status,
+                receivedAt: e.receivedAt
+            }))
+        });
+    }
+    catch (err){
+        console.error("Failed to fetch status: ", err);
+        return res.status(500).json({ message: "Server error" });
+    }
+}
+
+module.exports = { handleGitHubWebhook, getPipelineStatus };
