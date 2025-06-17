@@ -1,0 +1,12 @@
+{
+	"repository": {
+	    "full_name" : "user/repo"
+	},
+	"pusher": {
+	    "name" : "Gaurav"
+	},
+	"head_commit": {
+	    "message" : "test commit"
+	}
+}
+
