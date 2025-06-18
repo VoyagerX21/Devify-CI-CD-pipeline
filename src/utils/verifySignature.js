@@ -18,11 +18,17 @@ const verifySignature = (req, secret) => {
         .digest('hex');
     // Format the computed HMAC with the 'sha256=' prefix
     const expectedSignature = `sha256=${hmac}`;
+    const sigBuffer = Buffer.from(signature);
+    const expectedBuffer = Buffer.from(expectedSignature);
+
+    if (sigBuffer.length !== expectedBuffer.length){
+        return false;
+    }
     
     // Compare the provided and expected signatures securely
     return crypto.timingSafeEqual(
-        Buffer.from(signature),
-        Buffer.from(expectedSignature)
+        sigBuffer,
+        expectedBuffer
     );
 }
 
