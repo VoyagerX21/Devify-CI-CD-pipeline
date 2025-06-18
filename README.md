@@ -144,7 +144,8 @@ Get the list of recent pipeline events.
   - `x-hub-signature-256`: `sha256=your-computed-signature`
 - Payload: Sample GitHub JSON
 
-Use `echo -n '{"your":"payload"}' | openssl dgst -sha256 -hmac 'yourSecret'` to generate the correct signature.
+Write your body in temp.json file
+Use `echo -n temp.json | openssl dgst -sha256 -hmac 'yourSecret'` to generate the correct signature.
 
 ---
 

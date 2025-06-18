@@ -1,27 +1,11 @@
-const crypto = require('crypto');
 const pipelineService = require('../services/pipelineService');
 const Event = require('../models/Event');
-
-function verifySignature(req, secret) {
-    const signature = req.headers['x-hub-signature-256'];
-    if (!signature) return false;
-    const hmac = crypto
-        .createHmac('sha256', secret)
-        .update(req.body)
-        .digest('hex');
-    const expectedSignature = `sha256=${hmac}`;
-    console.log(expectedSignature);
-    return crypto.timingSafeEqual(
-        Buffer.from(signature),
-        Buffer.from(expectedSignature)
-    );
-}
+const verifySignature = require('../utils/verifySignature');
 
 const handleGitHubWebhook = async (req, res) => {
     const secret = process.env.WEBHOOK_SECRET;
     const event = req.headers['x-github-event'];
 
-    // ✅ req.body is still raw buffer, so parse manually
     let json;
     try {
         json = JSON.parse(req.body.toString());
@@ -30,7 +14,7 @@ const handleGitHubWebhook = async (req, res) => {
     }
 
     // Step 1: Verify signature
-    if (!verifySignature(req, secret)) {
+    if (!verifySignature.verifySignature(req, secret)) {
         console.log("Signature verification failed!");
         return res.status(401).json({ message: "Invalid signature" });
     }
