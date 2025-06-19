@@ -1,9 +1,15 @@
-// Import the Express application from the src/app module
-const app = require('./src/app');
 // Import dotenv to load environment variables from a .env file
 const dotenv = require('dotenv');
 // Load environment variables into process.env
 dotenv.config();
+// Import the Express application from the src/app module
+const app = require('./src/app');
+const cron = require('node-cron');
+const retryFailedEvents = require('./src/jobs/retryFailedEvents');
+
+cron.schedule('*/1 * * * *', () => {
+    retryFailedEvents();
+})
 
 // Import and execute the MongoDB connection function
 const connectDB = require('./src/config/db');

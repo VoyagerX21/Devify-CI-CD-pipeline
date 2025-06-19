@@ -2,6 +2,7 @@
 const pipelineService = require('../services/pipelineService');
 const Event = require('../models/Event');
 const verifySignature = require('../utils/verifySignature');
+const { sendNotification } = require('../services/notificationService');
 
 // Handles incoming GitHub webhook events
 const handleGitHubWebhook = async (req, res) => {
@@ -46,8 +47,11 @@ const handleGitHubWebhook = async (req, res) => {
             repository: json.repository?.full_name,
             pusher: json.pusher?.name,
             message: json.head_commit?.message,
-            status: 'failed'
+            status: 'failed',
+            retries: 0,
+            lastRetry: new Date()
         });
+        await sendNotification(`❌ Pipeline failed for event: *${event}* in *${json.repository?.full_name}*`);
         return res.status(500).json({ message: 'Pipeline trigger failed' });
     }
 };

@@ -7,8 +7,15 @@ const eventSchema = new mongoose.Schema({
   message: String,
   status: {
     type: String,
-    enum: ['triggered', 'failed'],
+    enum: ['triggered', 'failed', 'retrying'],
     default: 'triggered'
+  },
+  retries: {
+    type: Number,
+    default: 0
+  },
+  lastRetry: {
+    type: Date
   },
   receivedAt: {
     type: Date,
