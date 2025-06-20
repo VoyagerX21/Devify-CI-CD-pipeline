@@ -122,7 +122,21 @@ The server will start at: `http://localhost:3000`
 
 ## 📡 API Documentation
 
-- Complete API Documentation with Usage : `http://localhost:3000/api-docs`
+- Complete API Documentation with Usage : [api-docs](http://localhost:3000/api-docs)
+
+> ⚠️ **Note**: Please ensure that the server is running
+
+## 📡 Notification Channel
+
+> All pipeline trigger notifications are sent to a dedicated Slack channel.
+
+- **🔔 Slack Channel:** [View on Slack](https://app.slack.com/client/T0926KL6HN1/C0921L88WBV)
+- **👤 Login Credentials** *(if required for testing purposes)*:
+  - **Email:** `khakse2gaurav2003@gmail.com`
+  - **Password:** `Devify-Khakse@123`
+
+> ⚠️ **Note**: Please ensure your access to Slack workspace before using the above credentials. Credentials should only be used for assignment/demo purposes and changed before production deployment.
+
 
 ## 🧪 Testing with Postman (for debugging)
 
