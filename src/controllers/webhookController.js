@@ -6,8 +6,9 @@ const { sendNotification } = require('../services/notificationService');
 
 // Handles incoming GitHub webhook events
 const handleGitHubWebhook = async (req, res) => {
-    const secret = process.env.WEBHOOK_SECRET; // Webhook secret from environment variables
-    const event = req.headers['x-github-event']; // GitHub event type from headers
+    const platform = req.platform;
+    const secret = process.env.WEBHOOK_SECRET; // Webhook secret from environment variables // GitHub event type from headers
+    let isValid = false;
 
     // Parse incoming request body as JSON
     let json;
@@ -18,10 +19,15 @@ const handleGitHubWebhook = async (req, res) => {
     }
 
     // Step 1: Verify webhook signature for security
-    if (!verifySignature.verifySignature(req, secret)) {
-        console.log("Signature verification failed!");
-        return res.status(401).json({ message: "Invalid signature" });
+    if (platform === 'github') {
+        isValid = verifySignature.verifyGitHubSignature(req, secret);
+    } else if (platform === 'gitlab') {
+        isValid = verifySignature.verifyGitLabSignature(req, secret);
+    } else if (platform === 'bitbucket') {
+        isValid = true; // or custom logic
     }
+    if (!isValid) return res.status(401).send('Invalid signature');
+    const event = req.headers['x-github-event'] || req.headers['x-gitlab-event'] || req.headers['x-event-key'];
 
     // Step 2: Filter for supported GitHub events
     if (!['push', 'pull_request', 'merge'].includes(event)) {
@@ -30,8 +36,9 @@ const handleGitHubWebhook = async (req, res) => {
 
     // Step 3: Trigger CI/CD pipeline and log event
     try {
-        await pipelineService.triggerPipeline(event, json);
+        await pipelineService.triggerPipeline(event, json, platform);
         await Event.create({
+            platform: platform,
             eventType: event,
             repository: json.repository?.full_name,
             pusher: json.pusher?.name,
@@ -43,6 +50,7 @@ const handleGitHubWebhook = async (req, res) => {
     catch (err) {
         // Log failed pipeline trigger
         await Event.create({
+            platform: platform,
             eventType: event,
             repository: json.repository?.full_name,
             pusher: json.pusher?.name,
@@ -64,6 +72,7 @@ const getPipelineStatus = async (req, res) => {
         return res.status(200).json({
             count: events.length,
             events: events.map(e => ({
+                platfrom: e.platform,
                 type: e.eventType,
                 repository: e.repository,
                 pusher: e.pusher,

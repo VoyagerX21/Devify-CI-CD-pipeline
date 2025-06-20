@@ -4,7 +4,11 @@ const router = express.Router();
 const webhookController = require('../controllers/webhookController');
 
 // Define route for handling incoming GitHub webhook events
-router.post('/github', webhookController.handleGitHubWebhook);
+router.post('/:platform', (req, res, next) =>{
+    const platform = req.params.platform;
+    req.platform = platform;
+    next();
+}, webhookController.handleGitHubWebhook);
 
 // Define route for retrieving pipeline status history
 router.get('/status', webhookController.getPipelineStatus);

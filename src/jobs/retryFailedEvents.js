@@ -9,6 +9,7 @@ async function retryFailedEvents() {
       try {
         console.log("Running retry job");
         await pipelineService.triggerPipeline(event.eventType, {
+          platform: {platform: event.platform},
           repository: { full_name: event.repository },
           pusher: { name: event.pusher },
           head_commit: { message: event.message }

@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const eventSchema = new mongoose.Schema({
+  platform: String,
   eventType: String,
   repository: String,
   pusher: String,
