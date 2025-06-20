@@ -1,18 +1,24 @@
 # 🚀 DevifyX Node.js CI/CD Trigger Webhook
 
-A secure and modular Node.js backend service that listens for GitHub repository events (`push`, `pull_request`, `merge`) and triggers a mock CI/CD pipeline. It logs events, verifies signatures, and provides a status API — all without a frontend.
+A secure and modular Node.js backend service that listens for multiple repository platform's events (`push`, `pull_request`, `merge`) and triggers a mock CI/CD pipeline. It logs events, verifies signatures, and provides a status API — all without a frontend.
 
 ---
 
 ## 📌 Features
 
-- ✅ Webhook listener for GitHub
+- ✅ Webhook listener for VCS
+- ✅ Support for multiple repository platform simultaneously (GitHub, GitLab, BitBucket)
 - ✅ HMAC signature verification for security
 - ✅ Event filtering (push, pull_request, merge)
 - ✅ Mock CI/CD pipeline trigger
 - ✅ MongoDB-based logging of events
 - ✅ Pipeline status endpoint
 - ✅ Environment-based configuration
+- ✅ Notification-integration on Channel using Slack
+- ✅ Tested for the HMAC signature verification using jest library
+- ✅ Retry Mechanism for failed pipline triggers using cron jobs
+- ✅ API Documentation using Swagger
+- ✅ Error-handling at each point
 - 🐳 Optional Docker support
 
 ---
@@ -22,7 +28,7 @@ A secure and modular Node.js backend service that listens for GitHub repository 
 - **Backend**: Node.js, Express.js
 - **Database**: MongoDB (Mongoose)
 - **Security**: HMAC (SHA256)
-- **Tools**: dotenv, body-parser
+- **Tools**: dotenv, body-parser, jest, swagger, etc..
 
 ---
 
@@ -47,6 +53,7 @@ Create a `.env` file based on the `.env.example` provided.
 PORT=3000
 MONGODB_URI=mongodb+srv://VoyagerX21:h7r4RVCcEbU71Cn3@cluster1.kw3xd3o.mongodb.net/
 WEBHOOK_SECRET=supersecretstring
+SLACK_WEBHOOK_URL=https://hooks.slack.com/services/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
 ```
 
 ### 4. Run the Server
@@ -58,81 +65,64 @@ The server will start at: `http://localhost:3000`
 
 ---
 
-## 📬 Webhook Usage (GitHub)
+## 📬 Webhook Usage (GitHub, GitLab & Bitbucket)
 
-### Step 1: Add GitHub Webhook
-- Go to your GitHub repo → Settings → Webhooks → Add Webhook
-- **Payload URL**: `http://your-server.com/webhook/github`
+### 🔧 Step 1: Add Webhook on Your Repository Platform
+
+#### 📌 GitHub
+- Go to your GitHub **repository** → **Settings** → **Webhooks** → **Add Webhook**
+- **Payload URL**:  
+  ```
+  http://<your-server>/webhook/github
+  ```
 - **Content-Type**: `application/json`
-- **Secret**: Same as `WEBHOOK_SECRET` in your `.env`
-- Select events: `push`, `pull_request`, `merge` (or "Send me everything" for testing)
+- **Secret**: Use the same value as `WEBHOOK_SECRET` in your `.env`
+- **Events to trigger**:  
+  - Choose `push`, `pull_request`, `merge_group` *(or select "Send me everything" for testing)*
 
-### Step 2: GitHub will send signed payloads to your server
+#### 📌 GitLab
+- Go to your GitLab **project** → **Settings** → **Webhooks**
+- **URL**:  
+  ```
+  http://<your-server>/webhook/gitlab
+  ```
+- **Secret Token**: Use the same value as `WEBHOOK_SECRET` in your `.env`
+- **Trigger events**:  
+  - Enable `Push events`, `Merge request events`
+
+#### 📌 Bitbucket
+- Go to your Bitbucket **repo** → **Repository settings** → **Webhooks**
+- **Title**: e.g., `DevifyX Webhook`
+- **URL**:  
+  ```
+  http://<your-server>/webhook/bitbucket
+  ```
+- **Secret**: Bitbucket doesn't support HMAC secrets for webhook requests by default — implement IP whitelisting or custom header checks for security if needed.
+- **Events**: Enable `Push`, `Pull Request Created`, `Pull Request Merged`
+
+> ⚠️ Replace `<your-server>` with your actual deployed domain or `http://localhost:3000` during local testing.
+
+---
+
+### ✅ Step 2: Your Server Will Handle Webhook Payloads Securely
+
+- When an event (like `push` or `pull request`) occurs, the platform sends a `POST` request to your API:
+  - GitHub → `/webhook/github`
+  - GitLab → `/webhook/gitlab`
+  - Bitbucket → `/webhook/bitbucket`
+  
+- Your Node.js backend:
+  1. **Verifies** the request signature/token.
+  2. **Logs** the event into the database.
+  3. **Triggers a mock CI/CD pipeline**.
+  4. Optionally sends a **Slack notification**.
+  5. Retries failed pipelines automatically (if implemented).
 
 ---
 
 ## 📡 API Documentation
 
-### 🔹 POST `/webhook/github`
-Trigger the CI/CD pipeline via GitHub webhook.
-
-**Headers**:
-- `x-github-event`: `push` | `pull_request` | `merge`
-- `x-hub-signature-256`: HMAC signature of the payload
-
-**Body**:
-- GitHub JSON webhook payload
-
-**Response**:
-```json
-{ "message": "Pipeline triggered for push" }
-```
-
----
-
-### 🔹 GET `/webhook/status`
-Get the list of recent pipeline events.
-
-**Response**:
-```json
-{
-  "count": 2,
-  "events": [
-    {
-      "type": "push",
-      "repository": "user/repo",
-      "pusher": "username",
-      "message": "Commit message",
-      "status": "triggered",
-      "receivedAt": "2025-06-17T12:34:56Z"
-    }
-  ]
-}
-```
-
----
-
-## 📁 Project Structure
-
-```
-📦 root
- ┣ 📂controllers
- ┃ ┗ 📜webhookController.js
- ┣ 📂routes
- ┃ ┗ 📜webhookRoutes.js
- ┣ 📂services
- ┃ ┗ 📜pipelineService.js
- ┣ 📂models
- ┃ ┗ 📜Event.js
- ┣ 📜app.js
- ┣ 📜server.js
- ┣ 📜.env
- ┣ 📜.env.example
- ┣ 📜package.json
- ┗ 📜README.md
-```
-
----
+- Complete API Documentation with Usage : `http://localhost:3000/api-docs`
 
 ## 🧪 Testing with Postman (for debugging)
 
@@ -146,6 +136,44 @@ Get the list of recent pipeline events.
 
 Write your body in temp.json file
 Use `echo -n temp.json | openssl dgst -sha256 -hmac 'yourSecret'` to generate the correct signature.
+
+---
+
+## 📁 Project Structure
+
+```
+📦 root
+ ┣ 📂src
+  ┣ 📂config
+  ┃ ┗ 📜db.js
+  ┣ 📂controllers
+  ┃ ┗ 📜webhookController.js
+  ┣ 📂jobs
+  ┃ ┗ 📜retryFailedEvents.js
+  ┣ 📂models
+  ┃ ┗ 📜Event.js
+  ┣ 📂routes
+  ┃ ┗ 📜webhookRoutes.js
+  ┣ 📂services
+  ┃ ┗ 📜pipelineService.js
+  ┃ ┗ 📜notificationService.js
+  ┣ 📂utils
+  ┃ ┗ 📜verifySignature.js
+  ┣ 📜app.js
+ ┣ 📂tests
+  ┃ ┗ 📜verifySignature.test.js
+ ┣ 📜.dockerignore
+ ┣ 📜.env
+ ┣ 📜.env.example
+ ┣ 📜docker-compose.yml
+ ┣ 📜Dockerfile
+ ┣ 📜package-lock.json
+ ┣ 📜package.json
+ ┣ 📜README.md
+ ┣ 📜server.js
+ ┣ 📜swagger.yaml
+ ┗ 📜temp.json
+```
 
 ---
 

@@ -3,8 +3,8 @@ const pipelineService = require('../services/pipelineService');
 
 async function retryFailedEvents() {
   try {
+    // Getting all the failed events from the DB
     const failedEvents = await Event.find({ status: 'failed', retries: { $lt: 3 } });
-    // console.log(`🔍 Found ${failedEvents.length} failed events to retry`);
     for (const event of failedEvents) {
       try {
         console.log("Running retry job");

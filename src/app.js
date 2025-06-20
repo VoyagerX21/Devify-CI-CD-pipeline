@@ -5,6 +5,8 @@ const webhookRoutes = require('./routes/webhookRoutes');
 
 // Initialize the Express application
 const app = express();
+
+// Initialization for the API documentation at route /api-docs using swagger.yaml
 const swaggerUi = require('swagger-ui-express');
 const YAML = require('yamljs');
 const swaggerDocument = YAML.load('./swagger.yaml');

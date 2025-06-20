@@ -1,24 +1,22 @@
-// Import dotenv to load environment variables from a .env file
+// configured the .env
 const dotenv = require('dotenv');
-// Load environment variables into process.env
 dotenv.config();
-// Import the Express application from the src/app module
+
 const app = require('./src/app');
 const cron = require('node-cron');
 const retryFailedEvents = require('./src/jobs/retryFailedEvents');
 
+// Retrying of failure jobs using cron jobs every minute
 cron.schedule('*/1 * * * *', () => {
     retryFailedEvents();
 })
 
-// Import and execute the MongoDB connection function
+// connection of MongoDB
 const connectDB = require('./src/config/db');
 connectDB();
 
-// Set the port from environment variables, default to 3000 if not defined
+// Starting the server at the PORT 3000
 const PORT = process.env.PORT || 3000;
-
-// Start the Express server and log the port it's running on
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });

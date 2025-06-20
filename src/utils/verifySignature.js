@@ -32,6 +32,10 @@ const verifyGitHubSignature = (req, secret) => {
     );
 }
 
+// Verifies the signature from the incoming request
+// @param {Object} req - The incoming HTTP request object
+// @param {string} secret - The secret key directly from the .env
+// @returns {boolean} True if the signature is valid, false otherwise
 const verifyGitLabSignature = (req, secret) => {
   const token = req.headers['x-gitlab-token'];
   return token && token === secret;
