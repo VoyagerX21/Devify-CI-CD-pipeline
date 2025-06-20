@@ -1,0 +1,161 @@
+openapi: 3.0.0
+info:
+  title: DevifyX CI/CD Webhook Service
+  version: 1.0.0
+  description: |
+    A backend service to listen for code repository events (GitHub, GitLab, Bitbucket)
+    and trigger CI/CD pipelines securely via webhooks.
+servers:
+  - url: http://localhost:3000
+    description: Local development server
+
+paths:
+  /webhook/github:
+    post:
+      summary: Handle GitHub webhook event
+      description: Accepts push, pull request, and merge events from GitHub
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            example:
+              repository:
+                full_name: "gaura/devify"
+              pusher:
+                name: "gaura"
+              head_commit:
+                message: "Initial commit"
+      parameters:
+        - in: header
+          name: X-GitHub-Event
+          required: true
+          schema:
+            type: string
+          example: push
+        - in: header
+          name: X-Hub-Signature-256
+          required: true
+          schema:
+            type: string
+          example: sha256=abc123...
+      responses:
+        '200':
+          description: Pipeline triggered or event ignored
+        '401':
+          description: Invalid signature
+        '500':
+          description: Server error
+
+  /webhook/gitlab:
+    post:
+      summary: Handle GitLab webhook event
+      description: Accepts push, pull request and merge events from GitLab
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            example:
+              repository:
+                full_name: "gaura/devify"
+              pusher:
+                name: "gaura"
+              head_commit:
+                message: "Initial commit"
+      parameters:
+        - in: header
+          name: X-Gitlab-Event
+          required: true
+          schema:
+            type: string
+          example: Push
+        - in: header
+          name: x-gitlab-token
+          required: true
+          schema:
+            type: string
+          example: String
+      responses:
+        '200':
+          description: Pipeline triggered or event ignored
+        '500':
+          description: Server error
+
+  /webhook/bitbucket:
+    post:
+      summary: Handle Bitbucket webhook event
+      description: Accepts push events from Bitbucket
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            example:
+              repository:
+                full_name: "gaura/devify"
+              pusher:
+                name: "gaura"
+              head_commit:
+                message: "Initial commit"
+      parameters:
+        - in: header
+          name: X-Event-Key
+          required: true
+          schema:
+            type: string
+          example: push
+      responses:
+        '200':
+          description: Pipeline triggered or event ignored
+        '500':
+          description: Server error
+
+  /webhook/status:
+    get:
+      summary: Get pipeline status history
+      description: Returns the history of received webhook events and pipeline triggers
+      responses:
+        '200':
+          description: Status list returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  events:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                        repository:
+                          type: string
+                        pusher:
+                          type: string
+                        message:
+                          type: string
+                        status:
+                          type: string
+                          enum: [triggered, failed]
+                        receivedAt:
+                          type: string
+                          format: date-time
+        '500':
+          description: Server error
+
+components:
+  securitySchemes:
+    webhookSecret:
+      type: apiKey
+      in: header
+      name: X-Hub-Signature-256
+
+security:
+  - webhookSecret: []
