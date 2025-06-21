@@ -149,7 +149,7 @@ The server will start at: `http://localhost:3000`
 - Payload: Sample GitHub JSON
 
 Write your body in temp.json file
-Use `echo -n temp.json | openssl dgst -sha256 -hmac 'supersecretstring'` to generate the correct signature.
+Use `cat temp.json | openssl dgst -sha256 -hmac 'supersecretstring'` to generate the correct signature.
 
 ---
 
