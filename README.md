@@ -122,7 +122,7 @@ The server will start at: `http://localhost:3000`
 
 ## 📡 API Documentation
 
-- Complete API Documentation with Usage : [api-docs](http://localhost:3000/api-docs)
+- Complete API Documentation with Usage : <a href="http://localhost:3000/api-docs" target="_blank">api-docs</a>
 
 > ⚠️ **Note**: Please ensure that the server is running
 
@@ -130,7 +130,7 @@ The server will start at: `http://localhost:3000`
 
 > All pipeline trigger notifications are sent to a dedicated Slack channel.
 
-- **🔔 Slack Channel:** [View on Slack](https://app.slack.com/client/T0926KL6HN1/C0921L88WBV)
+- **🔔 Slack Channel:** <a href="https://app.slack.com/client/T0926KL6HN1/C0921L88WBV" target="_blank">View on slack</a>
 - **👤 Login Credentials** *(if required for testing purposes)*:
   - **Email:** `khakse2gaurav2003@gmail.com`
   - **Password:** `Devify-Khakse@123`
@@ -149,7 +149,7 @@ The server will start at: `http://localhost:3000`
 - Payload: Sample GitHub JSON
 
 Write your body in temp.json file
-Use `echo -n temp.json | openssl dgst -sha256 -hmac 'yourSecret'` to generate the correct signature.
+Use `echo -n temp.json | openssl dgst -sha256 -hmac 'supersecretstring'` to generate the correct signature.
 
 ---
 
