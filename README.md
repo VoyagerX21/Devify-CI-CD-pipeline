@@ -1,4 +1,4 @@
-# 🚀 DevifyX Node.js CI/CD Trigger Webhook
+# 🚀 Node.js CI/CD Trigger Webhook
 
 A secure and modular Node.js backend service that listens for multiple repository platform events (`push`, `pull_request`, `merge`) and triggers a mock CI/CD pipeline. It logs events, verifies signatures, retries failures, and sends Slack notifications — all **without a frontend**.
 
@@ -41,8 +41,8 @@ A secure and modular Node.js backend service that listens for multiple repositor
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/VoyagerX21/Devify-CI-CD-pipeline.git
-cd Devify-CI-CD-pipeline/
+git clone https://github.com/VoyagerX21/PipelineHub.git
+cd PipelineHub/
 ```
 
 ### 2. Install Dependencies
