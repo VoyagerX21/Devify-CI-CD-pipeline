@@ -25,7 +25,7 @@ app.use(express.json());
 app.use('/webhook', webhookRoutes);
 
 // Define a root route to confirm the webhook listener is running
-app.get('/', (req, res) => res.send('Webhook listener running!!'));
+app.get('/', (req, res) => res.send('Webhook listener running events!!'));
 
 // Export the Express app for use in other modules (e.g., server startup)
 module.exports = app;

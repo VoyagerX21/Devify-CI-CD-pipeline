@@ -122,7 +122,7 @@ The server will start at: `http://localhost:3000`
 
 ## 📡 API Documentation
 
-- Complete API Documentation with Usage : <a href="http://localhost:3000/api-docs" target="_blank">api-docs</a>
+- Complete API Documentation with Usage : <a href="https://devify-ci-cd-pipeline.onrender.com/api-docs" target="_blank">api-docs</a>
 
 > ⚠️ **Note**: Please ensure that the server is running
 
