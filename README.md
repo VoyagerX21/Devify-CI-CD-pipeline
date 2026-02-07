@@ -245,7 +245,6 @@ cat temp.json | openssl dgst -sha256 -hmac 'WEBHOOK_SECRET'
 ## 🧠 Author
 
 **Gourav Khakse**
-DevifyX – Assignment Submission
 
 ---
 
