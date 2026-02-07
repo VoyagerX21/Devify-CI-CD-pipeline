@@ -177,7 +177,6 @@ Use `cat temp.json | openssl dgst -sha256 -hmac 'supersecretstring'` to generate
  ┣ 📂tests
   ┃ ┗ 📜verifySignature.test.js
  ┣ 📜.dockerignore
- ┣ 📜.env
  ┣ 📜.env.example
  ┣ 📜docker-compose.yml
  ┣ 📜Dockerfile
