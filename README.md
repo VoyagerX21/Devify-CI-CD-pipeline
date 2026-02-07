@@ -50,9 +50,9 @@ npm install
 Create a `.env` file based on the `.env.example` provided.
 
 ```env
-PORT=3000
-MONGODB_URI=mongodb+srv://VoyagerX21:h7r4RVCcEbU71Cn3@cluster1.kw3xd3o.mongodb.net/
-WEBHOOK_SECRET=supersecretstring
+PORT=
+MONGODB_URI=
+WEBHOOK_SECRET=
 SLACK_WEBHOOK_URL=https://hooks.slack.com/services/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
 ```
 
