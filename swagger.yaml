@@ -1,93 +1,69 @@
 openapi: 3.0.0
 info:
-  title: DevifyX CI/CD Webhook Service
-  version: 1.0.0
+  title: PipelineHub CI/CD Webhook Service
+  version: 1.1.0
   description: |
-    A backend service to listen for code repository events (GitHub, GitLab, Bitbucket)
-    and trigger CI/CD pipelines securely via webhooks.
+    A production-deployed backend service that listens for repository events
+    from GitHub, GitLab, and Bitbucket, verifies authenticity, and triggers
+    CI/CD pipelines via secure webhooks.
+
 servers:
+  - url: https://devify-ci-cd-pipeline.onrender.com
+    description: Production server
   - url: http://localhost:3000
     description: Local development server
 
 paths:
-  /webhook/github:
+  /webhook/{platform}:
     post:
-      summary: Handle GitHub webhook event
-      description: Accepts push, pull request, and merge events from GitHub
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-            example:
-              repository:
-                full_name: "gaura/devify"
-              pusher:
-                name: "gaura"
-              head_commit:
-                message: "Initial commit"
+      summary: Handle VCS webhook event
+      description: |
+        Accepts webhook events from GitHub, GitLab, or Bitbucket.
+        Supported events include push, pull request, and merge.
       parameters:
-        - in: header
-          name: X-GitHub-Event
+        - in: path
+          name: platform
           required: true
           schema:
             type: string
+            enum: [github, gitlab, bitbucket]
+          example: github
+
+        - in: header
+          name: X-GitHub-Event
+          required: false
+          schema:
+            type: string
           example: push
+
         - in: header
           name: X-Hub-Signature-256
-          required: true
+          required: false
           schema:
             type: string
           example: sha256=abc123...
-      responses:
-        '200':
-          description: Pipeline triggered or event ignored
-        '401':
-          description: Invalid signature
-        '500':
-          description: Server error
 
-  /webhook/gitlab:
-    post:
-      summary: Handle GitLab webhook event
-      description: Accepts push, pull request and merge events from GitLab
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-            example:
-              repository:
-                full_name: "gaura/devify"
-              pusher:
-                name: "gaura"
-              head_commit:
-                message: "Initial commit"
-      parameters:
         - in: header
           name: X-Gitlab-Event
-          required: true
+          required: false
           schema:
             type: string
-          example: Push
+          example: Push Hook
+
         - in: header
           name: x-gitlab-token
-          required: true
+          required: false
           schema:
             type: string
-          example: String
-      responses:
-        '200':
-          description: Pipeline triggered or event ignored
-        '500':
-          description: Server error
+          example: supersecrettoken
 
-  /webhook/bitbucket:
-    post:
-      summary: Handle Bitbucket webhook event
-      description: Accepts push events from Bitbucket
+        - in: header
+          name: X-Event-Key
+          required: false
+          schema:
+            type: string
+          example: repo:push
+
       requestBody:
         required: true
         content:
@@ -101,23 +77,19 @@ paths:
                 name: "gaura"
               head_commit:
                 message: "Initial commit"
-      parameters:
-        - in: header
-          name: X-Event-Key
-          required: true
-          schema:
-            type: string
-          example: push
+
       responses:
         '200':
-          description: Pipeline triggered or event ignored
+          description: Webhook processed or event ignored
+        '401':
+          description: Invalid signature or unauthorized request
         '500':
-          description: Server error
+          description: Internal server error
 
   /webhook/status:
     get:
-      summary: Get pipeline status history
-      description: Returns the history of received webhook events and pipeline triggers
+      summary: Get pipeline execution history
+      description: Returns historical webhook events and pipeline trigger status.
       responses:
         '200':
           description: Status list returned
@@ -133,7 +105,7 @@ paths:
                     items:
                       type: object
                       properties:
-                        type:
+                        platform:
                           type: string
                         repository:
                           type: string
@@ -149,13 +121,3 @@ paths:
                           format: date-time
         '500':
           description: Server error
-
-components:
-  securitySchemes:
-    webhookSecret:
-      type: apiKey
-      in: header
-      name: X-Hub-Signature-256
-
-security:
-  - webhookSecret: []
