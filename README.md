@@ -1,155 +1,212 @@
 # 🚀 DevifyX Node.js CI/CD Trigger Webhook
 
-A secure and modular Node.js backend service that listens for multiple repository platform's events (`push`, `pull_request`, `merge`) and triggers a mock CI/CD pipeline. It logs events, verifies signatures, and provides a status API — all without a frontend.
+A secure and modular Node.js backend service that listens for multiple repository platform events (`push`, `pull_request`, `merge`) and triggers a mock CI/CD pipeline. It logs events, verifies signatures, retries failures, and sends Slack notifications — all **without a frontend**.
+
+> 🌐 **Live Deployment:** [https://devify-ci-cd-pipeline.onrender.com/](https://devify-ci-cd-pipeline.onrender.com/)
 
 ---
 
 ## 📌 Features
 
-- ✅ Webhook listener for VCS
-- ✅ Support for multiple repository platform simultaneously (GitHub, GitLab, BitBucket)
-- ✅ HMAC signature verification for security
-- ✅ Event filtering (push, pull_request, merge)
-- ✅ Mock CI/CD pipeline trigger
-- ✅ MongoDB-based logging of events
-- ✅ Pipeline status endpoint
-- ✅ Environment-based configuration
-- ✅ Notification-integration on Channel using Slack
-- ✅ Tested for the HMAC signature verification using jest library
-- ✅ Retry Mechanism for failed pipline triggers using cron jobs
-- ✅ API Documentation using Swagger
-- ✅ Error-handling at each point
-- 🐳 Optional Docker support
+* ✅ Webhook listener for VCS platforms
+* ✅ Supports multiple platforms simultaneously (GitHub, GitLab, Bitbucket)
+* ✅ HMAC signature verification for security
+* ✅ Event filtering (`push`, `pull_request`, `merge`)
+* ✅ Mock CI/CD pipeline trigger
+* ✅ MongoDB-based event logging
+* ✅ Pipeline status API
+* ✅ Environment-based configuration
+* ✅ Slack channel notifications
+* ✅ Jest tests for HMAC verification
+* ✅ Retry mechanism for failed pipeline triggers (cron jobs)
+* ✅ API documentation using Swagger
+* ✅ Centralized error handling
+* 🐳 Optional Docker support
 
 ---
 
 ## 🧪 Tech Stack
 
-- **Backend**: Node.js, Express.js
-- **Database**: MongoDB (Mongoose)
-- **Security**: HMAC (SHA256)
-- **Tools**: dotenv, body-parser, jest, swagger, etc..
+* **Backend:** Node.js, Express.js
+* **Database:** MongoDB (Mongoose)
+* **Security:** HMAC (SHA256)
+* **Testing:** Jest
+* **Docs:** Swagger
+* **Utilities:** dotenv, body-parser, node-cron
 
 ---
 
-## ⚙️ Setup Instructions
+## ⚙️ Setup Instructions (Local)
 
 ### 1. Clone the Repository
+
 ```bash
 git clone https://github.com/VoyagerX21/Devify-CI-CD-pipeline.git
 cd Devify-CI-CD-pipeline/
 ```
 
 ### 2. Install Dependencies
+
 ```bash
 npm install
 ```
 
 ### 3. Configure Environment Variables
 
-Create a `.env` file based on the `.env.example` provided.
+Create a `.env` file based on `.env.example`:
 
 ```env
-PORT=
-MONGODB_URI=
-WEBHOOK_SECRET=
-SLACK_WEBHOOK_URL=https://hooks.slack.com/services/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
+PORT=3000
+MONGODB_URI=your_mongodb_connection_string
+WEBHOOK_SECRET=your_webhook_secret
+SLACK_WEBHOOK_URL=your_slack_incoming_webhook_url
 ```
 
 ### 4. Run the Server
+
 ```bash
 npm start
 ```
 
-The server will start at: `http://localhost:3000`
+Server runs at:
+
+```
+http://localhost:3000
+```
+
+---
+
+## 🌐 Using the Live Deployed Server (Recommended for Testing)
+
+You **do not need to run the server locally** to test this project.
+
+The backend is already deployed at:
+
+```
+https://devify-ci-cd-pipeline.onrender.com
+```
+
+You can directly attach this service as a webhook endpoint in **your own GitHub / GitLab / Bitbucket repositories**.
+
+> ⚠️ **Important Note**
+>
+> * Slack notifications are sent to **my Slack workspace/channel**.
+> * To **see notifications**, you must have access to that Slack workspace.
+> * You **do not** need to configure Slack yourself for testing.
 
 ---
 
 ## 📬 Webhook Usage (GitHub, GitLab & Bitbucket)
 
-### 🔧 Step 1: Add Webhook on Your Repository Platform
+### 🔧 GitHub Webhook Setup
 
-#### 📌 GitHub
-- Go to your GitHub **repository** → **Settings** → **Webhooks** → **Add Webhook**
-- **Payload URL**:  
-  ```
-  http://<your-server>/webhook/github
-  ```
-- **Content-Type**: `application/json`
-- **Secret**: Use the same value as `WEBHOOK_SECRET` in your `.env`
-- **Events to trigger**:  
-  - Choose `push`, `pull_request`, `merge_group` *(or select "Send me everything" for testing)*
+* Repository → **Settings** → **Webhooks** → **Add Webhook**
+* **Payload URL:**
 
-#### 📌 GitLab
-- Go to your GitLab **project** → **Settings** → **Webhooks**
-- **URL**:  
   ```
-  http://<your-server>/webhook/gitlab
+  https://devify-ci-cd-pipeline.onrender.com/webhook/github
   ```
-- **Secret Token**: Use the same value as `WEBHOOK_SECRET` in your `.env`
-- **Trigger events**:  
-  - Enable `Push events`, `Merge request events`
+* **Content-Type:** `application/json`
+* **Secret:** Use the same value as `WEBHOOK_SECRET`
+* **Events:**
 
-#### 📌 Bitbucket
-- Go to your Bitbucket **repo** → **Repository settings** → **Webhooks**
-- **Title**: e.g., `DevifyX Webhook`
-- **URL**:  
-  ```
-  http://<your-server>/webhook/bitbucket
-  ```
-- **Secret**: Bitbucket doesn't support HMAC secrets for webhook requests by default — implement IP whitelisting or custom header checks for security if needed.
-- **Events**: Enable `Push`, `Pull Request Created`, `Pull Request Merged`
-
-> ⚠️ Replace `<your-server>` with your actual deployed domain or `http://localhost:3000` during local testing.
+  * `push`
+  * `pull_request`
+  * `merge_group` (optional)
 
 ---
 
-### ✅ Step 2: Your Server Will Handle Webhook Payloads Securely
+### 🔧 GitLab Webhook Setup
 
-- When an event (like `push` or `pull request`) occurs, the platform sends a `POST` request to your API:
-  - GitHub → `/webhook/github`
-  - GitLab → `/webhook/gitlab`
-  - Bitbucket → `/webhook/bitbucket`
-  
-- Your Node.js backend:
-  1. **Verifies** the request signature/token.
-  2. **Logs** the event into the database.
-  3. **Triggers a mock CI/CD pipeline**.
-  4. Optionally sends a **Slack notification**.
-  5. Retries failed pipelines automatically (if implemented).
+* Project → **Settings** → **Webhooks**
+* **URL:**
+
+  ```
+  https://devify-ci-cd-pipeline.onrender.com/webhook/gitlab
+  ```
+* **Secret Token:** Same as `WEBHOOK_SECRET`
+* **Trigger events:**
+
+  * Push events
+  * Merge request events
+
+---
+
+### 🔧 Bitbucket Webhook Setup
+
+* Repository → **Repository settings** → **Webhooks**
+* **URL:**
+
+  ```
+  https://devify-ci-cd-pipeline.onrender.com/webhook/bitbucket
+  ```
+* **Events:**
+
+  * Push
+  * Pull request created
+  * Pull request merged
+
+> ℹ️ Bitbucket does not support HMAC secrets natively. IP whitelisting or custom header checks can be added if required.
+
+---
+
+## 🔄 What Happens When a Webhook Is Triggered
+
+1. Incoming request is received
+2. Signature / token is verified
+3. Event is stored in MongoDB
+4. Mock CI/CD pipeline is triggered
+5. Slack notification is sent
+6. Failed pipelines are retried via cron jobs
 
 ---
 
 ## 📡 API Documentation
 
-- Complete API Documentation with Usage : <a href="https://devify-ci-cd-pipeline.onrender.com/api-docs" target="_blank">api-docs</a>
+Swagger UI is available at:
 
-> ⚠️ **Note**: Please ensure that the server is running
+```
+https://devify-ci-cd-pipeline.onrender.com/api-docs
+```
 
-## 📡 Notification Channel
+> ⚠️ Ensure the server is awake (Render free tier may sleep).
 
-> All pipeline trigger notifications are sent to a dedicated Slack channel.
+---
 
-- **🔔 Slack Channel:** <a href="https://app.slack.com/client/T0926KL6HN1/C0921L88WBV" target="_blank">View on slack</a>
-- **👤 Login Credentials** *(if required for testing purposes)*:
-  - **Email:** `khakse2gaurav2003@gmail.com`
-  - **Password:** `Devify-Khakse@123`
+## 🔔 Slack Notification Channel
 
-> ⚠️ **Note**: Please ensure your access to Slack workspace before using the above credentials. Credentials should only be used for assignment/demo purposes and changed before production deployment.
+All pipeline trigger notifications are sent to a **dedicated Slack channel**.
 
+* **Slack Channel:**
+  [https://app.slack.com/client/T0926KL6HN1/C0921L88WBV](https://app.slack.com/client/T0926KL6HN1/C0921L88WBV)
 
-## 🧪 Testing with Postman (for debugging)
+* **Demo Login Credentials (for assignment/testing only):**
 
-- Set method: `POST`
-- URL: `http://localhost:3000/webhook/github`
-- Body → `raw` → `JSON`
-- Headers:
-  - `x-github-event`: `push`
-  - `x-hub-signature-256`: `sha256=your-computed-signature`
-- Payload: Sample GitHub JSON
+  * **Email:** [khakse2gaurav2003@gmail.com](mailto:khakse2gaurav2003@gmail.com)
+  * **Password:** Devify-Khakse@123
 
-Write your body in temp.json file
-Use `cat temp.json | openssl dgst -sha256 -hmac 'supersecretstring'` to generate the correct signature.
+> ⚠️ Credentials are provided **only for demo/assignment purposes** and must be rotated before production use.
+
+---
+
+## 🧪 Testing via Postman (Optional)
+
+* **Method:** POST
+* **URL:**
+
+  ```
+  http://localhost:3000/webhook/github
+  ```
+* **Headers:**
+
+  * `x-github-event: push`
+  * `x-hub-signature-256: sha256=<computed-signature>`
+
+Generate signature:
+
+```bash
+cat temp.json | openssl dgst -sha256 -hmac 'WEBHOOK_SECRET'
+```
 
 ---
 
@@ -158,38 +215,38 @@ Use `cat temp.json | openssl dgst -sha256 -hmac 'supersecretstring'` to generate
 ```
 📦 root
  ┣ 📂src
-  ┣ 📂config
-  ┃ ┗ 📜db.js
-  ┣ 📂controllers
-  ┃ ┗ 📜webhookController.js
-  ┣ 📂jobs
-  ┃ ┗ 📜retryFailedEvents.js
-  ┣ 📂models
-  ┃ ┗ 📜Event.js
-  ┣ 📂routes
-  ┃ ┗ 📜webhookRoutes.js
-  ┣ 📂services
-  ┃ ┗ 📜pipelineService.js
-  ┃ ┗ 📜notificationService.js
-  ┣ 📂utils
-  ┃ ┗ 📜verifySignature.js
-  ┣ 📜app.js
+ ┃ ┣ 📂config
+ ┃ ┃ ┗ db.js
+ ┃ ┣ 📂controllers
+ ┃ ┃ ┗ webhookController.js
+ ┃ ┣ 📂jobs
+ ┃ ┃ ┗ retryFailedEvents.js
+ ┃ ┣ 📂models
+ ┃ ┃ ┗ Event.js
+ ┃ ┣ 📂routes
+ ┃ ┃ ┗ webhookRoutes.js
+ ┃ ┣ 📂services
+ ┃ ┃ ┣ pipelineService.js
+ ┃ ┃ ┗ notificationService.js
+ ┃ ┣ 📂utils
+ ┃ ┃ ┗ verifySignature.js
+ ┃ ┣ app.js
  ┣ 📂tests
-  ┃ ┗ 📜verifySignature.test.js
- ┣ 📜.dockerignore
- ┣ 📜.env.example
- ┣ 📜docker-compose.yml
- ┣ 📜Dockerfile
- ┣ 📜package-lock.json
- ┣ 📜package.json
- ┣ 📜README.md
- ┣ 📜server.js
- ┣ 📜swagger.yaml
- ┗ 📜temp.json
+ ┃ ┗ verifySignature.test.js
+ ┣ .env.example
+ ┣ docker-compose.yml
+ ┣ Dockerfile
+ ┣ swagger.yaml
+ ┣ server.js
 ```
 
 ---
 
 ## 🧠 Author
 
-Made by Gourav Khakse | DevifyX Assignment Submission
+**Gourav Khakse**
+DevifyX – Assignment Submission
+
+---
+
+⭐ If you find this useful, feel free to star the repo and test it using your own repositories!
