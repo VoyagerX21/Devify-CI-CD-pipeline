@@ -37,7 +37,7 @@ const handleGitHubWebhook = async (req, res) => {
     // Step 3: Trigger CI/CD pipeline and log event
     try {
         console.log(json);
-        // console.log(req.body);
+        console.log(req.body);
         await pipelineService.triggerPipeline(event, json, platform);
         await Event.create({
             platform: platform,
