@@ -2,7 +2,7 @@
 
 A secure and modular Node.js backend service that listens for multiple repository platform events (`push`, `pull_request`, `merge`) and triggers a mock CI/CD pipeline. It logs events, verifies signatures, retries failures, and sends Slack notifications — all **without a frontend**.
 
-> 🌐 **Live Deployment:** [https://devify-ci-cd-pipeline.onrender.com/](https://devify-ci-cd-pipeline.onrender.com/)
+> 🌐 **Live Deployment:** [https://pipelinehub.khakse.dev/](https://pipelinehub.khakse.dev/)
 
 ---
 
@@ -83,7 +83,7 @@ You **do not need to run the server locally** to test this project.
 The backend is already deployed at:
 
 ```
-https://devify-ci-cd-pipeline.onrender.com
+https://pipelinehub.khakse.dev
 ```
 
 You can directly attach this service as a webhook endpoint in **your own GitHub / GitLab / Bitbucket repositories**.
@@ -104,7 +104,7 @@ You can directly attach this service as a webhook endpoint in **your own GitHub 
 * **Payload URL:**
 
   ```
-  https://devify-ci-cd-pipeline.onrender.com/webhook/github
+  https://pipelinehub.khakse.dev/webhook/github
   ```
 * **Content-Type:** `application/json`
 * **Secret:** Use the same value as `WEBHOOK_SECRET`
@@ -122,7 +122,7 @@ You can directly attach this service as a webhook endpoint in **your own GitHub 
 * **URL:**
 
   ```
-  https://devify-ci-cd-pipeline.onrender.com/webhook/gitlab
+  https://pipelinehub.khakse.dev/webhook/gitlab
   ```
 * **Secret Token:** Same as `WEBHOOK_SECRET`
 * **Trigger events:**
@@ -138,7 +138,7 @@ You can directly attach this service as a webhook endpoint in **your own GitHub 
 * **URL:**
 
   ```
-  https://devify-ci-cd-pipeline.onrender.com/webhook/bitbucket
+  https://pipelinehub.khakse.dev/webhook/bitbucket
   ```
 * **Events:**
 
@@ -166,7 +166,7 @@ You can directly attach this service as a webhook endpoint in **your own GitHub 
 Swagger UI is available at:
 
 ```
-https://devify-ci-cd-pipeline.onrender.com/api-docs
+https://pipelinehub.khakse.dev/api-docs
 ```
 
 > ⚠️ Ensure the server is awake (Render free tier may sleep).
