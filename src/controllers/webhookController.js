@@ -29,9 +29,30 @@ const handleGitHubWebhook = async (req, res) => {
     if (!isValid) return res.status(401).send('Invalid signature');
     const event = req.headers['x-github-event'] || req.headers['x-gitlab-event'] || req.headers['x-event-key'];
 
+    const supportedEvents = {
+        github: ['push', 'pull_request', 'merge', 'workflow_run'],
+
+        gitlab: [
+            'Push Hook',
+            'Tag Push Hook',
+            'Merge Request Hook',
+            'Pipeline Hook'
+        ],
+
+        bitbucket: [
+            'repo:push',
+            'pullrequest:created',
+            'pullrequest:updated',
+            'pullrequest:merged'
+        ]
+    };
+
     // Step 2: Filter for supported GitHub events
-    if (!['push', 'pull_request', 'merge'].includes(event)) {
-        return res.status(200).json({ message: `Event ${event} ignored` });
+    if (!supportedEvents[platform]?.includes(event)) {
+        console.log(`[${platform}] ${event} event ignored`);
+        return res.status(200).json({
+            message: `Event ${event} ignored`
+        });
     }
 
     // Step 3: Trigger CI/CD pipeline and log event
