@@ -3,6 +3,10 @@ const pipelineService = require('../services/pipelineService');
 const Event = require('../models/Event');
 const verifySignature = require('../utils/verifySignature');
 const { sendNotification } = require('../services/notificationService');
+const Event2 = require("../models/Event2");
+const Commit = require("../models/Commit");
+const Repository = require('../models/Repository');
+const User = require('../models/User');
 
 // Handles incoming GitHub webhook events
 const handleGitHubWebhook = async (req, res) => {
@@ -87,6 +91,293 @@ const handleGitHubWebhook = async (req, res) => {
     }
 };
 
+const normalizeEventType = (platform, rawEvent, payload) => {
+    if (platform === "github") {
+        if (rawEvent === "push") return "push";
+
+        if (rawEvent === "pull_request") {
+            if (
+                payload.action === "closed" &&
+                payload.pull_request?.merged
+            ) return "merge";
+            return "pull_request";
+        }
+
+        if (rawEvent === "workflow_run") return "pipeline";
+    }
+
+    if (platform === "gitlab") {
+        if (rawEvent === "Push Hook") return "push";
+        if (rawEvent === "Tag Push Hook") return "tag_push";
+
+        if (rawEvent === "Merge Request Hook") {
+            if (payload.object_attributes?.state === "merged")
+                return "merge";
+            return "pull_request";
+        }
+
+        if (rawEvent === "Pipeline Hook") return "pipeline";
+    }
+
+    if (platform === "bitbucket") {
+        if (rawEvent === "repo:push") return "push";
+
+        if (rawEvent === "pullrequest:merged") return "merge";
+
+        if (
+            rawEvent === "pullrequest:created" ||
+            rawEvent === "pullrequest:updated"
+        ) return "pull_request";
+    }
+
+    return null;
+};
+
+const upsertUser = async (platform, payload) => {
+    let userData = {};
+
+    if (platform === "github") {
+        userData = {
+            provider: "github",
+            externalId: payload.sender.id.toString(),
+            username: payload.sender.login,
+            avatarUrl: payload.sender.avatar_url,
+            profileUrl: payload.sender.html_url
+        };
+    }
+
+    if (platform === "gitlab") {
+        userData = {
+            provider: "gitlab",
+            externalId: payload.user_id?.toString(),
+            username: payload.user_username,
+            avatarUrl: null,
+            profileUrl: null
+        };
+    }
+
+    if (platform === "bitbucket") {
+        userData = {
+            provider: "bitbucket",
+            externalId: payload.actor?.uuid,
+            username: payload.actor?.display_name,
+            avatarUrl: payload.actor?.links?.avatar?.href,
+            profileUrl: payload.actor?.links?.html?.href
+        };
+    }
+
+    return await User.findOneAndUpdate(
+        { provider: userData.provider, externalId: userData.externalId },
+        userData,
+        { upsert: true, new: true }
+    );
+};
+
+const upsertRepository = async (platform, payload, ownerId) => {
+    let repoData = {};
+
+    if (platform === "github") {
+        repoData = {
+            provider: "github",
+            externalRepoId: payload.repository.id.toString(),
+            name: payload.repository.name,
+            fullName: payload.repository.full_name,
+            ownerId,
+            defaultBranch: payload.repository.default_branch,
+            isPrivate: payload.repository.private
+        };
+    }
+
+    if (platform === "gitlab") {
+        repoData = {
+            provider: "gitlab",
+            externalRepoId: payload.project.id.toString(),
+            name: payload.project.name,
+            fullName: payload.project.path_with_namespace,
+            ownerId,
+            defaultBranch: payload.project.default_branch,
+            isPrivate: payload.project.visibility !== "public"
+        };
+    }
+
+    if (platform === "bitbucket") {
+        repoData = {
+            provider: "bitbucket",
+            externalRepoId: payload.repository.uuid,
+            name: payload.repository.name,
+            fullName: payload.repository.full_name,
+            ownerId,
+            defaultBranch: payload.repository.mainbranch?.name,
+            isPrivate: payload.repository.is_private
+        };
+    }
+
+    return await Repository.findOneAndUpdate(
+        { provider: repoData.provider, externalRepoId: repoData.externalRepoId },
+        repoData,
+        { upsert: true, new: true }
+    );
+};
+
+const createEvent = async (
+    platform,
+    normalizedType,
+    payload,
+    repositoryId,
+    senderId,
+    rawEvent
+) => {
+    return await Event2.create({
+        provider: platform,
+        type: normalizedType,
+        rawEvent,
+        repositoryId,
+        senderId,
+        branch:
+            payload.ref ||
+            payload.object_attributes?.source_branch ||
+            payload.pullrequest?.source?.branch?.name,
+
+        before: payload.before,
+        after: payload.after,
+
+        eventTimestamp: new Date(),
+        rawPayload: payload
+    });
+};
+
+const createCommitsIfAny = async (
+    platform,
+    payload,
+    repositoryId,
+    eventId
+) => {
+    let commits = [];
+
+    if (platform === "github" && payload.commits) {
+        commits = payload.commits.map(c => ({
+            commitId: c.id,
+            repositoryId,
+            eventId,
+            message: c.message,
+            authorName: c.author?.name,
+            authorEmail: c.author?.email,
+            authorDate: c.timestamp,
+            addedFiles: c.added || [],
+            removedFiles: c.removed || [],
+            modifiedFiles: c.modified || []
+        }));
+    }
+
+    if (platform === "gitlab" && payload.commits) {
+        commits = payload.commits.map(c => ({
+            commitId: c.id,
+            repositoryId,
+            eventId,
+            message: c.message,
+            authorName: c.author?.name,
+            authorEmail: c.author?.email,
+            authorDate: c.timestamp,
+            addedFiles: c.added || [],
+            removedFiles: c.removed || [],
+            modifiedFiles: c.modified || []
+        }));
+    }
+
+    if (platform === "bitbucket" && payload.push?.changes) {
+        payload.push.changes.forEach(change => {
+            change.commits?.forEach(c => {
+                commits.push({
+                    commitId: c.hash,
+                    repositoryId,
+                    eventId,
+                    message: c.message,
+                    authorName: c.author?.user?.display_name,
+                    authorEmail: null,
+                    authorDate: c.date,
+                    addedFiles: [],
+                    removedFiles: [],
+                    modifiedFiles: []
+                });
+            });
+        });
+    }
+
+    if (commits.length > 0) {
+        await Commit.insertMany(commits, { ordered: false });
+    }
+};
+
+const handleEvent = async (req, res) => {
+    try {
+        const payload = JSON.parse(req.body.toString());
+        const platform = req.platform;
+
+        let rawEvent;
+
+        if (platform === "github")
+            rawEvent = req.headers["x-github-event"];
+
+        if (platform === "gitlab")
+            rawEvent = req.headers["x-gitlab-event"];
+
+        if (platform === "bitbucket")
+            rawEvent = req.headers["x-event-key"];
+
+        const normalizedType = normalizeEventType(
+            platform,
+            rawEvent,
+            payload
+        );
+
+        if (!normalizedType) {
+            console.log(`Ignored event: ${rawEvent}`);
+            return res.status(200).json({
+                message: `Event ${rawEvent} ignored`
+            });
+        }
+
+        const user = await upsertUser(platform, payload);
+        const repository = await upsertRepository(
+            platform,
+            payload,
+            user._id
+        );
+
+        const event = await createEvent(
+            platform,
+            normalizedType,
+            payload,
+            repository._id,
+            user._id,
+            rawEvent
+        );
+
+        if (normalizedType === "push") {
+            await createCommitsIfAny(
+                platform,
+                payload,
+                repository._id,
+                event._id
+            );
+        }
+
+        console.log(
+            `Processed ${normalizedType} event for ${platform}`
+        );
+
+        return res.status(200).json({
+            message: "Event processed successfully"
+        });
+
+    } catch (error) {
+        console.error("Webhook Error:", error);
+        return res.status(500).json({
+            message: "Internal Server Error"
+        });
+    }
+}
+
 // Retrieves pipeline event history
 const getPipelineStatus = async (req, res) => {
     try {
@@ -112,4 +403,4 @@ const getPipelineStatus = async (req, res) => {
 }
 
 // Export controller functions
-module.exports = { handleGitHubWebhook, getPipelineStatus };
+module.exports = { handleGitHubWebhook, getPipelineStatus, handleEvent };

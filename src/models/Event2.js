@@ -56,4 +56,4 @@ eventSchema.index({ senderId: 1 });
 eventSchema.index({ provider: 1, type: 1 });
 eventSchema.index({ eventTimestamp: -1 });
 
-module.exports = mongoose.model("Event", eventSchema);
+module.exports = mongoose.model("Event2", eventSchema);
