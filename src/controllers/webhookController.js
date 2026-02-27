@@ -91,7 +91,7 @@ const handleGitHubWebhook = async (req, res) => {
 const getPipelineStatus = async (req, res) => {
     try {
         // Fetch all events, sorted by most recent
-        const events = await Event.find().sort({ received: -1 });
+        const events = await Event.find().sort({ createdAt: -1 });
         return res.status(200).json({
             count: events.length,
             events: events.map(e => ({
