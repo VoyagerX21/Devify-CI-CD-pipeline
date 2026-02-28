@@ -310,9 +310,10 @@ const createCommitsIfAny = async (
 
 const handleEvent = async (req, res) => {
     try {
-        const payload = JSON.parse(req.body.toString());
-        console.log(payload);
+        const payload = req.body;
+        // console.log(payload);
         const platform = req.platform;
+        console.log(req.platform);
 
         let rawEvent;
 
