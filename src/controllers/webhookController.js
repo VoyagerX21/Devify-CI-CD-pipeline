@@ -310,8 +310,8 @@ const createCommitsIfAny = async (
 
 const handleEvent = async (req, res) => {
     try {
-        console.log(req.body);
         const payload = JSON.parse(req.body.toString());
+        console.log(payload);
         const platform = req.platform;
 
         let rawEvent;
@@ -374,7 +374,8 @@ const handleEvent = async (req, res) => {
     } catch (error) {
         console.error("Webhook Error:", error);
         return res.status(500).json({
-            message: "Internal Server Error"
+            message: "Internal Server Error",
+            e: error
         });
     }
 }
