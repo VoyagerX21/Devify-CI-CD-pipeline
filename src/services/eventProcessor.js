@@ -1,4 +1,4 @@
-const { triggerPipeline } = require("./pipelineService");
+const { triggerPipeline } = require("./pipelineEngine");
 const { dispatchWebhooks } = require("./webhookDispatcher");
 
 const processEvent = async (eventDoc, payload) => {

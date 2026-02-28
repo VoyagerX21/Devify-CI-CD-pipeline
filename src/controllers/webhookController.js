@@ -7,6 +7,7 @@ const Event2 = require("../models/Event2");
 const Commit = require("../models/Commit");
 const Repository = require('../models/Repository');
 const User = require('../models/User');
+const { processEvent } = require('../services/eventProcessor');
 
 // Handles incoming GitHub webhook events
 const handleGitHubWebhook = async (req, res) => {
@@ -363,6 +364,8 @@ const handleEvent = async (req, res) => {
                 event._id
             );
         }
+
+        await processEvent(event, payload);
 
         console.log(
             `Processed ${normalizedType} event for ${platform}`

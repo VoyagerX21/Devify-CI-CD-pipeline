@@ -4,11 +4,14 @@ const WebhookDelivery = require("../models/WebhookDelivery");
 
 const dispatchWebhooks = async (eventDoc) => {
   console.log(`[DISPATCHER] Dispatching webhooks for ${eventDoc.type}`);
-
+  
   const webhooks = await Webhook.find({
     isEnabled: true,
     subscribedEvents: eventDoc.type
   });
+  
+  console.log("Event Type:", eventDoc.type);
+  console.log("Webhooks Found:", webhooks.length);
 
   for (const hook of webhooks) {
     const startTime = Date.now();
