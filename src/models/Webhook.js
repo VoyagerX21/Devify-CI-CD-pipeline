@@ -12,7 +12,10 @@ const webhookSchema = new mongoose.Schema(
       required: true,
     },
 
-    subscribedEvents: [String],
+    subscribedEvents: {
+      type: [String],
+      default: ["push", "merge", "pull_request", "pipeline"]
+    },
 
     providers: [
       {

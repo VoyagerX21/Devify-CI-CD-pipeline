@@ -4,11 +4,11 @@ dotenv.config();
 
 const app = require('./src/app');
 const cron = require('node-cron');
-const retryFailedEvents = require('./src/jobs/retryFailedEvents');
+const retryFailedDeliveries = require('./src/jobs/retryFailedDeliveries');
 
 // Retrying of failure jobs using cron jobs every minute
 cron.schedule('*/1 * * * *', () => {
-    retryFailedEvents();
+    retryFailedDeliveries();
 })
 
 // connection of MongoDB

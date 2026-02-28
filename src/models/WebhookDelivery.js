@@ -23,6 +23,11 @@ const webhookDeliverySchema = new mongoose.Schema(
     responseCode: Number,
     responseTimeMs: Number,
 
+    retries: {
+      type: Number,
+      default: 0
+    },
+
     deliveredAt: {
       type: Date,
       default: Date.now,
