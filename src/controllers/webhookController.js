@@ -208,7 +208,7 @@ const upsertRepository = async (platform, payload, ownerId) => {
             name: payload.repository.name,
             fullName: payload.repository.full_name,
             ownerId,
-            defaultBranch: payload.repository.mainbranch?.name,
+            defaultBranch: payload.push?.changes[0]?.new?.name,
             isPrivate: payload.repository.is_private
         };
     }
@@ -237,7 +237,8 @@ const createEvent = async (
         branch:
             payload.ref ||
             payload.object_attributes?.source_branch ||
-            payload.pullrequest?.source?.branch?.name,
+            payload.pullrequest?.source?.branch?.name ||
+            payload.push?.changes[0]?.new?.name,
 
         before: payload.before,
         after: payload.after,

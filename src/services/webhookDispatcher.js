@@ -18,7 +18,7 @@ const dispatchWebhooks = async (eventDoc, user, repo) => {
     const startTime = Date.now();
 
     try {
-      const branch = eventDoc.branch || "N/A";
+      const branch = eventDoc.branch || payload.push?.changes[0]?.new?.name || "N/A";
       const message = `
         🚀 *PipelineHub Notification*
 
