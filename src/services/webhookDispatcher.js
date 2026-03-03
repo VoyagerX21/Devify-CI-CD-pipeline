@@ -30,10 +30,10 @@ const dispatchWebhooks = async (eventDoc, user, repo) => {
 
         ⚙️ Processed via *PipelineHub CI Orchestration Engine*
       `;
-      await sendSlackMessage(message);
-      // const response = await axios.post(hook.targetUrl, {
-      //   text: `🚀 Event ${eventDoc.type} from ${eventDoc.provider}`
-      // });
+      // await sendSlackMessage(message);
+      const response = await axios.post(hook.targetUrl, {
+        text: message
+      });
 
       await WebhookDelivery.create({
         webhookId: hook._id,
