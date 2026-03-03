@@ -8,7 +8,7 @@ router.post('/:platform', (req, res, next) =>{
     const platform = req.params.platform;
     req.platform = platform;
     next();
-}, webhookController.handleGitHubWebhook);
+}, webhookController.handleEvent);
 
 // Define route for retrieving pipeline status history
 router.get('/status', webhookController.getPipelineStatus);
