@@ -365,7 +365,7 @@ const handleEvent = async (req, res) => {
             );
         }
 
-        await processEvent(event, payload);
+        await processEvent(event, payload, user, repo);
 
         console.log(
             `Processed ${normalizedType} event for ${platform}`

@@ -3,7 +3,7 @@ const Webhook = require("../models/Webhook");
 const WebhookDelivery = require("../models/WebhookDelivery");
 const { sendSlackMessage } = require("../utils/slackLogger");
 
-const dispatchWebhooks = async (eventDoc) => {
+const dispatchWebhooks = async (eventDoc, user, repo) => {
   console.log(`[DISPATCHER] Dispatching webhooks for ${eventDoc.type}`);
 
   const webhooks = await Webhook.find({
@@ -18,20 +18,13 @@ const dispatchWebhooks = async (eventDoc) => {
     const startTime = Date.now();
 
     try {
-      const actor =
-        eventDoc.actorName ||
-        eventDoc.pusher ||
-        eventDoc.author ||
-        "Unknown";
-
       const branch = eventDoc.branch || "N/A";
-
       const message = `
         🚀 *PipelineHub Notification*
 
         📌 *Event:* ${eventDoc.type.toUpperCase()}
-        👤 *Triggered by:* ${actor}
-        📂 *Repository:* ${eventDoc.repositoryName || "Unknown"}
+        👤 *Triggered by:* ${user.username || "Unknown"}
+        📂 *Repository:* ${repo.name || "Unknown"}
         🌿 *Branch:* ${branch}
         🔗 *Platform:* ${eventDoc.provider.toUpperCase()}
 
