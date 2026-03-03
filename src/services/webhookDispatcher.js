@@ -18,10 +18,7 @@ const dispatchWebhooks = async (eventDoc) => {
 
     try {
       const response = await axios.post(hook.targetUrl, {
-        event: eventDoc.type,
-        provider: eventDoc.provider,
-        repositoryId: eventDoc.repositoryId,
-        eventId: eventDoc._id
+        text: `🚀 Event ${eventDoc.type} from ${eventDoc.provider}`
       });
 
       await WebhookDelivery.create({
