@@ -312,10 +312,12 @@ const createCommitsIfAny = async (
 
 const handleEvent = async (req, res) => {
     try {
-        const payload = req.body;
+        const payload = req.body.toString();
         // console.log(payload);
+        console.log(req.headers);
         const platform = req.platform;
         console.log(req.platform);
+        return res.json({msg: "interupted"});
 
         let rawEvent;
 
