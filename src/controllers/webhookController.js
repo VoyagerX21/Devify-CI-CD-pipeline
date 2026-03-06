@@ -319,6 +319,7 @@ const handleEvent = async (req, res) => {
         const platform = req.platform;
         console.log(req.platform);
         // return res.json({msg: "interupted"});
+        const secret = process.env.WEBHOOK_SECRET;
 
         let rawEvent;
 
@@ -327,7 +328,7 @@ const handleEvent = async (req, res) => {
             isValid = verifySignature.verifyGitHubSignature(req, secret);
         if (platform === "gitlab")
             rawEvent = req.headers["x-gitlab-event"];
-            isValid = verifySignature.verifySignature(req, secret);
+            isValid = verifySignature.verifyGitLabSignature(req, secret);
         if (platform === "bitbucket")
             rawEvent = req.headers["x-event-key"];
             isValid = verifySignature.verifyGitHubSignature(req, secret);
