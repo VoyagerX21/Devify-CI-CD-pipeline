@@ -312,24 +312,32 @@ const createCommitsIfAny = async (
 
 const handleEvent = async (req, res) => {
     try {
+        let isValid  = false
         const payload = req.body.toString();
         // console.log(payload);
         console.log(req.headers);
         const platform = req.platform;
         console.log(req.platform);
-        return res.json({msg: "interupted"});
+        // return res.json({msg: "interupted"});
 
         let rawEvent;
 
         if (platform === "github")
             rawEvent = req.headers["x-github-event"];
-
+            isValid = verifySignature.verifyGitHubSignature(req, secret);
         if (platform === "gitlab")
             rawEvent = req.headers["x-gitlab-event"];
-
+            isValid = verifySignature.verifySignature(req, secret);
         if (platform === "bitbucket")
             rawEvent = req.headers["x-event-key"];
-
+            isValid = verifySignature.verifyGitHubSignature(req, secret);
+        
+        if (isValid){
+            return res.json({msg :"signatue verified"});
+        }
+        else{
+            return res.json({msg :"showcase"})
+        }
         const normalizedType = normalizeEventType(
             platform,
             rawEvent,
