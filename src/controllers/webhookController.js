@@ -334,9 +334,11 @@ const handleEvent = async (req, res) => {
             isValid = verifySignature.verifyGitHubSignature(req, secret);
         
         if (isValid){
+            console.log("signature verified");
             return res.json({msg :"signatue verified"});
         }
         else{
+            console.log("signature verification failed");
             return res.json({msg :"showcase"})
         }
         const normalizedType = normalizeEventType(

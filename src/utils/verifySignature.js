@@ -12,7 +12,7 @@ const verifyGitHubSignature = (req, secret) => {
     if (!signature) return false;
 
     // Compute the HMAC SHA-256 of the request body using the secret
-    console.log("Checking signature, it is there!!");
+    // console.log("Checking signature, it is there!!");
     const hmac = crypto
         .createHmac('sha256', secret)
         .update(req.body)
