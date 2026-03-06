@@ -312,37 +312,39 @@ const createCommitsIfAny = async (
 
 const handleEvent = async (req, res) => {
     try {
-        let isValid  = false
-        const payload = req.body.toString();
-        // console.log(payload);
-        console.log(req.headers);
         const platform = req.platform;
-        console.log(req.platform);
-        // return res.json({msg: "interupted"});
         const secret = process.env.WEBHOOK_SECRET;
-
+        
+        // Verify signature BEFORE parsing the body
+        let isValid = false;
         let rawEvent;
 
         if (platform === "github"){
             rawEvent = req.headers["x-github-event"];
             isValid = verifySignature.verifyGitHubSignature(req, secret);
-            // console.log(isValid);
-        }
-        if (platform === "gitlab"){
+        } else if (platform === "gitlab"){
             rawEvent = req.headers["x-gitlab-event"];
             isValid = verifySignature.verifyGitLabSignature(req, secret);
-            // console.log(isValid);
-        }
-        if (platform === "bitbucket"){
+        } else if (platform === "bitbucket"){
             rawEvent = req.headers["x-event-key"];
             isValid = verifySignature.verifyGitHubSignature(req, secret);
-            // console.log(isValid);
         }
         
         if (!isValid){
-            console.log("signature verification failed");
-            return res.status(400).json({msg :"Signature verification failed"});
+            console.log(`[${platform}] Signature verification failed`);
+            return res.status(401).json({msg: "Signature verification failed"});
         }
+
+        // Now parse the payload after signature verification
+        let payload;
+        try {
+            const bodyBuffer = Buffer.isBuffer(req.body) ? req.body : Buffer.from(req.body);
+            payload = JSON.parse(bodyBuffer.toString());
+        } catch (err) {
+            console.error(`[${platform}] Failed to parse payload:`, err.message);
+            return res.status(400).json({msg: "Invalid JSON payload"});
+        }
+
         const normalizedType = normalizeEventType(
             platform,
             rawEvent,
@@ -350,7 +352,7 @@ const handleEvent = async (req, res) => {
         );
 
         if (!normalizedType) {
-            console.log(`Ignored event: ${rawEvent}`);
+            console.log(`[${platform}] Ignored event: ${rawEvent}`);
             return res.status(200).json({
                 message: `Event ${rawEvent} ignored`
             });
@@ -384,7 +386,7 @@ const handleEvent = async (req, res) => {
         await processEvent(event, payload, user, repository);
 
         console.log(
-            `Processed ${normalizedType} event for ${platform}`
+            `[${platform}] Processed ${normalizedType} event successfully`
         );
 
         return res.status(200).json({
@@ -392,10 +394,10 @@ const handleEvent = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Webhook Error:", error);
+        console.error(`[${platform}] Webhook Error:`, error);
         return res.status(500).json({
             message: "Internal Server Error",
-            e: error
+            error: error.message
         });
     }
 }

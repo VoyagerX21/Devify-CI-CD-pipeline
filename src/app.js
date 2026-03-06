@@ -14,16 +14,14 @@ const swaggerDocument = YAML.load('./swagger.yaml');
 
 // Apply raw body parser middleware specifically for GitHub webhook endpoint
 // to handle raw JSON payloads
-app.use('/webhook/github', express.raw({ type: 'application/json' }));
-app.use('/webhook/gitlab', express.raw({ type: 'application/json' }));
-app.use('/webhook/bitbucket', express.raw({ type: 'application/json' }));
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-// Apply JSON body parser middleware for all other routes
-app.use(express.json());
 
 // Mount webhook routes under the '/webhook' path
 app.use('/webhook', webhookRoutes);
+
+// Apply JSON body parser middleware for all other routes
+app.use(express.json());
 
 // Testing webhook route
 app.use('/testwebhook', testwebhook);
