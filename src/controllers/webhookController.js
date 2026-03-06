@@ -323,15 +323,21 @@ const handleEvent = async (req, res) => {
 
         let rawEvent;
 
-        if (platform === "github")
+        if (platform === "github"){
             rawEvent = req.headers["x-github-event"];
             isValid = verifySignature.verifyGitHubSignature(req, secret);
-        if (platform === "gitlab")
+            // console.log(isValid);
+        }
+        if (platform === "gitlab"){
             rawEvent = req.headers["x-gitlab-event"];
             isValid = verifySignature.verifyGitLabSignature(req, secret);
-        if (platform === "bitbucket")
+            // console.log(isValid);
+        }
+        if (platform === "bitbucket"){
             rawEvent = req.headers["x-event-key"];
             isValid = verifySignature.verifyGitHubSignature(req, secret);
+            // console.log(isValid);
+        }
         
         if (isValid){
             console.log("signature verified");

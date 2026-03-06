@@ -39,6 +39,7 @@ const verifyGitHubSignature = (req, secret) => {
 // @returns {boolean} True if the signature is valid, false otherwise
 const verifyGitLabSignature = (req, secret) => {
   const token = req.headers['x-gitlab-token'];
+//   console.log(token);
   return token && token === secret;
 };
 
