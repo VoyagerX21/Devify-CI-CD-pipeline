@@ -339,13 +339,9 @@ const handleEvent = async (req, res) => {
             // console.log(isValid);
         }
         
-        if (isValid){
-            console.log("signature verified");
-            return res.json({msg :"signatue verified"});
-        }
-        else{
+        if (!isValid){
             console.log("signature verification failed");
-            return res.json({msg :"showcase"})
+            return res.status(400).json({msg :"Signature verification failed"});
         }
         const normalizedType = normalizeEventType(
             platform,
