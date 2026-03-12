@@ -1,11 +1,108 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PIPELINEHUB</title>
+    <title>Pipeline App</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 520px;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #555;
+            margin-bottom: 25px;
+        }
+
+        .buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .buttons a {
+            text-decoration: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+        }
+
+        .demo {
+            background: #007bff;
+        }
+
+        .github {
+            background: #24292e;
+        }
+
+        .docs {
+            background: #28a745;
+        }
+
+        .buttons a:hover {
+            opacity: 0.9;
+        }
+
+        .note {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #777;
+        }
+    </style>
 </head>
+
 <body>
-    HELLO WORLD
+
+    <div class="card">
+
+        <h1>Pipeline App</h1>
+
+        <p>
+            This project was originally deployed on this URL and referenced in my resume.
+            The deployment has been migrated to a new environment.
+        </p>
+
+        <div class="buttons">
+
+            <a class="demo" href="https://pipelinehubb.khakse.dev" target="_blank">
+                Live Demo
+            </a>
+
+            <a class="github" href="https://github.com/VoyagerX21/Pipeline-Hub" target="_blank">
+                GitHub Repository
+            </a>
+
+            <a class="docs" href="https://pipelinehub.khakse.dev" target="_blank">
+                API Documentation
+            </a>
+
+        </div>
+
+    </div>
+
 </body>
+
 </html>
